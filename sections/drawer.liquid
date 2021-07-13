@@ -1,0 +1,152 @@
+<section class="drawer" id="drawer-name" data-drawer-target>
+  <div class="drawer__overlay" data-drawer-close tabindex="-1"></div>
+  <div class="drawer__wrapper">
+    <div class="drawer__header">
+      <button class="drawer__close" data-drawer-close aria-label="Close Drawer"></button>
+    </div>
+    
+    
+    
+    <div class="drawer__content" id="cart__drawer">
+      <div class="drawer__title">
+        Kurv ({{ cart.item_count }})
+      </div>
+      <div id="drawer_cart_items">
+        {% assign collection = collections['test-products'] %}
+
+          
+
+            {% for product in collection.products%}
+ 				<div class="product-form__controls-group">
+                  <div class="drawer_product_wrap">
+                    <div class="drawer_product_img">
+                      <a href="{{product.url}}"><img src="{{ product | img_url }}"> </a>
+
+                  </div>
+                    <div class="drawer_product_info">
+                    <div class="drawer_product_title">
+                      <p>
+                       {{product.title}} 
+                      </p>
+                    </div>
+                  	<div id="drawer_product_price">
+                      <p>{{product.price | money}} </p>
+                                  {% if section.settings.show_quantity_selector %}
+              <div class="product-form__controls-group">
+                <div class="product-form__item">
+                  <label for="Quantity-{{ section.id }}">{{ 'products.product.quantity' | t }}</label>
+                  <input type="number" id="Quantity-{{ section.id }}"
+                    name="quantity" value="1" min="1" pattern="[0-9]*"
+                    class="product-form__input product-form__input--quantity" data-quantity-input
+                  >
+                </div>
+              </div>
+            {% endif %}
+                  	</div>	
+                    </div>
+                    <div class="drawer_counter">
+                      <button class="drawer_counter_remove" type="button">-</button>
+                      <input class="drawer_counter_quantity" name="quantity" type="number" value="1">
+                      <button class="drawer_counter_add" type="button">+</button>
+                    </div>
+                  
+                  </div>
+			
+
+                {% for option in product.options_with_values %}
+                  <div class="drawer_product_variant_wrap selector-wrapper js product-form__item">
+                    {%if option.name == "Color"%}
+                    {%assign index = forloop.index %}
+
+                    {%for value in option.values%}
+                    <div class="drawer_product_variant">
+                      <p class="drawer_variant_option">
+                        {{value | escape}}</p>
+                      
+                         <div id="drawer_product_price">
+                        {{product.price | money}}
+                  	</div>	
+                         <img src="{{value | escape | append:'.png' | strip | asset_url}}"/>
+                      <input class="single-option-selector-{{ section.id }}" id="color-{{forloop.index}}" type="radio" name="color" value="{{value | escape}}" data-index="option{{index}}" {% if option.selected_value == value %} checked{%endif%}/>
+                    </div>
+                    
+                    {%endfor%}
+                    
+                    {%elsif option.name == "bundle" %}
+                     {%for value in option.values%}
+                    <div class="drawer_product_variant">
+                      <p class="drawer_variant_option">
+                        {{value | escape}}</p>
+                         <div id="drawer_product_price">
+                        {{product.price | money}}
+                  	</div>	
+                      <input class="single-option-selector-{{ section.id }}" id="color-{{forloop.index}}" type="radio" name="bundle" value="{{value | escape}}" data-index="option{{index}}" {% if option.selected_value == value %} checked{%endif%}/>
+                    </div>
+                    {%endfor%}
+                    </select>
+                    {%endif%}
+                  </div>
+                {% endfor %}
+              </div>
+            
+            {% endfor %}
+                      </ul>
+
+
+
+      </div>
+
+    </div>
+  		<div class="drawer_cart_total" "><h4>Subtotal <span id="drawer_total_amount"></span></h4> </div>
+          <div id="drawer_cart_bottom" >
+        <a id="drawer_checkout_btn" href="/checkout" class="btn btn--has-icon-after cart__continue-btn" style="width:100%;">Betaling</a>
+        <a  href="/cart" class="drawer_cart_btn" style="width:100%;">Se Kurv</a>
+      </div>
+  </div>
+</section>
+
+
+<script>
+
+  fetch('/cart.js')
+  .then((resp) => resp.json())
+  .then((data) => {
+          {%comment%}
+    if(data.items.length > 0) {
+        data.items.forEach(function(product, index) { 
+          document.getElementById('drawer_cart_items').innerHTML += '<div><img src="' + product.featured_image.url + '" alt="' + product.featured_image.alt + '"><h5>' + product.title + '</h5><p>' + product.quantity + ' x ' + theme.Currency.formatMoney(product.line_price, theme.moneyFormat) + '</p> </div>';
+      	});
+    } else {
+      document.getElementById('drawer_cart_items').innerHTML = '<p>Cart is empty</p>';
+      document.getElementById('drawer_checkout_btn').setAttribute('disabled', 'disabled');
+      document.getElementById('drawer_checkout_btn').style.pointerEvents = 'none';
+
+    }
+          {%endcomment %}
+       document.getElementById('drawer_total_amount').innerHTML = theme.Currency.formatMoney(data.total_price, theme.moneyFormat);
+
+  });
+  
+</script>
+
+
+{%comment%}
+
+  fetch('/cart.js')
+  .then((resp) => resp.json())
+  .then((data) => {
+    console.log(data);
+    if(data.items.length > 0) {
+        data.items.forEach(function(product, index) { 
+          document.getElementById('cart__drawer_items').innerHTML = '<img src="' + product.featured_image.url + '" alt="' + product.featured_image.alt + '"><h5>' + product.title + '</h5><p>' + product.quantity + ' x ' + theme.Currency.formatMoney(product.line_price, theme.moneyFormat) + '</p>';
+      	});
+    } else {
+      document.getElementById('drawer_cart_items').innerHTML = '<p>Cart is empty</p>';
+      document.getElementById('drawer_checkout_btn').setAttribute('disabled', 'disabled');
+      document.getElementById('drawer_checkout_btn').style.pointerEvents = 'none';
+    }
+    
+    
+  });
+
+{%endcomment %}
